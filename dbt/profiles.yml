@@ -1,0 +1,23 @@
+nyc_taxi_lakehouse:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: your-gcp-project-id
+      dataset: data_project_gold
+      location: asia-southeast1
+      threads: 4
+      timeout_seconds: 300
+      priority: batch
+
+    # Uncomment the following block to add a production target configuration
+    # prod:
+    #   type: bigquery
+    #   method: oauth
+    #   project: <your-gcp-project-id>
+    #   dataset: <your-dataset-name>
+    #   location: asia-southeast1
+    #   threads: 8
+    #   timeout_seconds: 300
+    #   priority: batch

@@ -1,0 +1,116 @@
+version: 2
+
+sources:
+  - name: bronze
+    schema: data_project_bronze
+    tables:
+      - name: green_taxi_raw
+        columns:
+          - name: VendorID
+            tests: [not_null]
+          - name: lpep_pickup_datetime
+            tests: [not_null]
+          - name: lpep_dropoff_datetime
+            tests: [not_null]
+          - name: trip_distance
+            tests: [not_null]
+
+      - name: yellow_taxi_raw
+        columns:
+          - name: VendorID
+            tests: [not_null]
+          - name: tpep_pickup_datetime
+            tests: [not_null]
+          - name: tpep_dropoff_datetime
+            tests: [not_null]
+          - name: payment_type
+            tests: [not_null]
+
+models:
+  - name: green_taxi_staging
+    schema: data_project_silver
+    description: "Silver layer for green taxi data with cleaned and validated records"
+    columns:
+      - name: vendor_id
+        tests: [not_null]
+      - name: lpep_pickup_datetime
+        tests: [not_null]
+      - name: lpep_dropoff_datetime
+        tests: [not_null]
+      - name: trip_distance
+        tests: [not_null]
+
+  - name: yellow_taxi_staging
+    schema: data_project_silver
+    description: "Silver layer for yellow taxi data with cleaned and validated records"
+    columns:
+      - name: vendor_id
+        tests: [not_null]
+      - name: tpep_pickup_datetime
+        tests: [not_null]
+      - name: tpep_dropoff_datetime
+        tests: [not_null]
+      - name: trip_distance
+        tests: [not_null]
+
+  - name: dim_payment_method
+    schema: data_project_gold
+    description: "Dimension table for payment methods"
+    columns:
+      - name: payment_method_name
+        tests:
+          - accepted_values:
+              values: ['Credit Card', 'Cash', 'No Charge', 'Dispute', 'Unknown', 'Voided Trip', 'Others']
+
+  - name: dim_trip_type
+    schema: data_project_gold
+    description: "Dimension table for trip types"
+    columns:
+      - name: trip_type_name
+        tests:
+          - accepted_values:
+              values: ['Street-hail', 'Dispatch']
+
+  - name: fact_trips
+    schema: data_project_gold
+    description: "Fact table for taxi trips with measures and foreign keys to dimensions"
+    columns:
+      - name: taxi_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['green', 'yellow']
+      - name: year
+        tests: [not_null]
+      - name: month
+        tests: [not_null]              
+      - name: trip_id
+        tests: [not_null]
+      - name: pickup_date
+        tests: [not_null]
+
+  - name: fact_trips_monthly
+    schema: data_project_gold
+    description: "Monthly aggregated fact table for taxi trips with measures and foreign keys to dimensions"
+    columns:
+      - name: taxi_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['green', 'yellow']
+      - name: year
+        tests: [not_null]
+      - name: month
+        tests: [not_null]
+
+  - name: fact_trips_by_payment
+    schema: data_project_gold
+    description: "Fact table for taxi trips aggregated by payment method with measures and foreign keys to dimensions"
+    columns:
+      - name: taxi_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['green', 'yellow']
+      - name: payment_type
+        tests: [not_null]
